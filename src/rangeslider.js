@@ -162,13 +162,13 @@ RangeSlider.prototype = {
 		this.options.locked = true;
 		this.ctp.enable(false);
 		if (typeof this.box != 'undefined')
-			videojs.addClass(this.box.el_, 'locked');
+			videojs.addClass(this.box.el(), 'locked');
 	},
 	unlock: function() {
 		this.options.locked = false;
 		this.ctp.enable();
 		if (typeof this.box !='undefined')
-			videojs.removeClass(this.box.el_, 'locked');
+			videojs.removeClass(this.box.el(), 'locked');
 	},
 	show:function(){
 		this.options.hidden = false;
@@ -188,12 +188,12 @@ RangeSlider.prototype = {
 	showPanel:function(){
 		this.options.panel = true;
 		if (typeof this.tp !='undefined')
-			videojs.removeClass(this.tp.el_, 'disable');			
+			videojs.removeClass(this.tp.el(), 'disable');			
 	},
 	hidePanel:function(){
 		this.options.panel = false;
 		if (typeof this.tp !='undefined')
-			videojs.addClass(this.tp.el_, 'disable');	
+			videojs.addClass(this.tp.el(), 'disable');	
 	},
 	showcontrolTime:function(){
 		this.options.controlTime = true;
@@ -278,7 +278,7 @@ RangeSlider.prototype = {
 		
 		duration = typeof duration == 'undefined'? 0 : duration;
 		
-		var percentage = this[index === 0? "left" : "right"].el_.style.left.replace("%","");
+		var percentage = this[index === 0? "left" : "right"].el().style.left.replace("%","");
 		if (percentage == "")
 			percentage = index === 0? 0 : 100;
 			
@@ -300,8 +300,8 @@ RangeSlider.prototype = {
 	},
 	_reset: function() {
 		var duration = this.player.duration();
-		this.tpl.el_.style.left = '0%';
-		this.tpr.el_.style.left = '100%';
+		this.tpl.el().style.left = '0%';
+		this.tpr.el().style.left = '100%';
 		this._setValuesLocked(0,duration);
 	},
 	_setValuesLocked: function(start,end, writeControlTime){
@@ -373,14 +373,14 @@ RangeSlider.prototype = {
 			this._triggerSliderChange();
 		}
 		if (index===1){
-			var oldTimeLeft = this.ctpl.el_.children,
+			var oldTimeLeft = this.ctpl.el().children,
 				durationSelLeft = videojs.TextTrack.prototype.parseCueTime(oldTimeLeft[0].value+":"+oldTimeLeft[1].value+":"+oldTimeLeft[2].value);
 			if (durationSel < durationSelLeft){
 				obj.style.border = "1px solid red";
 			}
 		}else{
 			
-			var oldTimeRight = this.ctpr.el_.children,
+			var oldTimeRight = this.ctpr.el().children,
 				durationSelRight = videojs.TextTrack.prototype.parseCueTime(oldTimeRight[0].value+":"+oldTimeRight[1].value+":"+oldTimeRight[2].value);
 			if (durationSel > durationSelRight){
 				obj.style.border = "1px solid red";
@@ -463,8 +463,8 @@ videojs.Player.prototype.getValueSlider = function(){
 //----------------Create new Components----------------//
 
 //--Charge the new Component into videojs
-videojs.SeekBar.prototype.options_.children.RSTimeBar={}; //Range Slider Time Bar
-videojs.ControlBar.prototype.options_.children.ControlTimePanel={}; //Panel with the time of the range slider
+videojs.SeekBar.prototype.options().children.RSTimeBar={}; //Range Slider Time Bar
+videojs.ControlBar.prototype.options().children.ControlTimePanel={}; //Panel with the time of the range slider
 
 
 
@@ -484,14 +484,14 @@ videojs.RSTimeBar = videojs.Component.extend({
 });
 
 videojs.RSTimeBar.prototype.init_ = function(){
-    	this.rs = this.player_.rangeslider;
+    	this.rs = this.player().rangeslider;
 };
 
-videojs.RSTimeBar.prototype.options_ = {
+videojs.RSTimeBar.prototype.options({
 	children: {
 		'SeekRSBar': {}
 	}
-};
+});
 
 videojs.RSTimeBar.prototype.createEl = function(){
 	return videojs.Component.prototype.createEl.call(this, 'div', {
@@ -517,17 +517,17 @@ videojs.SeekRSBar = videojs.Component.extend({
 });
 
 videojs.SeekRSBar.prototype.init_ =function(){
-    	this.rs = this.player_.rangeslider;
+    	this.rs = this.player().rangeslider;
 };
 
-videojs.SeekRSBar.prototype.options_ = {
+videojs.SeekRSBar.prototype.options({
 	children: {
 		'SelectionBar': {},
 		'SelectionBarLeft': {},
 		'SelectionBarRight': {},
-		'TimePanel': {},
+		'TimePanel': {}
 	}
-};
+});
 
 videojs.SeekRSBar.prototype.createEl = function(){
 	return videojs.Component.prototype.createEl.call(this, 'div', {
@@ -560,8 +560,8 @@ videojs.SeekRSBar.prototype.onMouseMove = function(event) {
 		this.setPosition(1,left);
 		
 	//Fix a problem with the presition in the display time
-	var currentTimeDisplay = this.player_.controlBar.currentTimeDisplay.el_;
-	currentTimeDisplay.innerHTML = '<span class="vjs-control-text">Current Time </span>'+vjs.formatTime(this.rs._seconds(left), this.player_.duration());
+	var currentTimeDisplay = this.player().controlBar.currentTimeDisplay.el();
+	currentTimeDisplay.innerHTML = '<span class="vjs-control-text">Current Time </span>'+vjs.formatTime(this.rs._seconds(left), this.player().duration());
 	
 	// Trigger slider change
 	if (this.rs.left.pressed||this.rs.right.pressed) {
@@ -587,13 +587,13 @@ videojs.SeekRSBar.prototype.setPosition = function(index,left,writeControlTime) 
 		return false;
 		
 	// Alias
-	var ObjLeft = this.rs.left.el_,
-		ObjRight = this.rs.right.el_,
-		Obj = this.rs[index === 0 ? 'left' : 'right'].el_,
-		tpr = this.rs.tpr.el_,
-		tpl = this.rs.tpl.el_,
+	var ObjLeft = this.rs.left.el(),
+		ObjRight = this.rs.right.el(),
+		Obj = this.rs[index === 0 ? 'left' : 'right'].el(),
+		tpr = this.rs.tpr.el(),
+		tpl = this.rs.tpl.el(),
 		bar = this.rs.bar,
-		ctp = this.rs[index === 0 ? 'ctpl' : 'ctpr'].el_;
+		ctp = this.rs[index === 0 ? 'ctpl' : 'ctpr'].el();
 	
 	//Check if left arrow is passing the right arrow
 	if ((index === 0 ?bar.updateLeft(left):bar.updateRight(left))){
@@ -616,20 +616,20 @@ videojs.SeekRSBar.prototype.setPosition = function(index,left,writeControlTime) 
 			tplTextLegth = tpl.children[0].innerHTML.length;
 		var MaxP,MinP,MaxDisP;
 		if (tplTextLegth<=4) //0:00
-			MaxDisP = this.player_.isFullScreen?3.25:6.5;
+			MaxDisP = this.player().isFullScreen?3.25:6.5;
 		else if(tplTextLegth<=5)//00:00
-			MaxDisP = this.player_.isFullScreen?4:8;
+			MaxDisP = this.player().isFullScreen?4:8;
 		else//0:00:00
-			MaxDisP = this.player_.isFullScreen?5:10;
+			MaxDisP = this.player().isFullScreen?5:10;
 		if(TimeText.length<=4){ //0:00
-			MaxP = this.player_.isFullScreen?97:93;
-			MinP = this.player_.isFullScreen?0.1:0.5;
+			MaxP = this.player().isFullScreen?97:93;
+			MinP = this.player().isFullScreen?0.1:0.5;
 		}else if(TimeText.length<=5){//00:00
-			MaxP = this.player_.isFullScreen?96:92;
-			MinP = this.player_.isFullScreen?0.1:0.5;
+			MaxP = this.player().isFullScreen?96:92;
+			MinP = this.player().isFullScreen?0.1:0.5;
 		}else{//0:00:00
-			MaxP = this.player_.isFullScreen?95:91;
-			MinP = this.player_.isFullScreen?0.1:0.5;
+			MaxP = this.player().isFullScreen?95:91;
+			MinP = this.player().isFullScreen?0.1:0.5;
 		}
 		
 		if (index===0){
@@ -680,13 +680,13 @@ videojs.SeekRSBar.prototype.calculateDistance = function(event){
 };
 
 videojs.SeekRSBar.prototype.getRSTBWidth = function() {
-	return this.el_.offsetWidth;
+	return this.el().offsetWidth;
 };
 videojs.SeekRSBar.prototype.getRSTBX = function() {
-	return videojs.findPosition(this.el_).left;
+	return videojs.findPosition(this.el()).left;
 };
 videojs.SeekRSBar.prototype.getWidth = function() {
-	return this.rs.left.el_.offsetWidth;//does not matter left or right
+	return this.rs.left.el().offsetWidth;//does not matter left or right
 };
 
 
@@ -707,7 +707,7 @@ videojs.SelectionBar = videojs.Component.extend({
 });
 
 videojs.SelectionBar.prototype.init_ = function(){
-    	this.rs = this.player_.rangeslider;
+    	this.rs = this.player().rangeslider;
 };
 
 videojs.SelectionBar.prototype.createEl = function(){
@@ -717,42 +717,42 @@ videojs.SelectionBar.prototype.createEl = function(){
 };
 
 videojs.SelectionBar.prototype.onMouseUp = function(){
-	var start = this.rs.left.el_.style.left.replace("%",""),
-		end = this.rs.right.el_.style.left.replace("%",""),
-		duration = this.player_.duration(),
+	var start = this.rs.left.el().style.left.replace("%",""),
+		end = this.rs.right.el().style.left.replace("%",""),
+		duration = this.player().duration(),
 		precision = this.rs.updatePrecision,
 		segStart = videojs.round(start * duration/100, precision),
 		segEnd = videojs.round(end * duration/100, precision);
-	this.player_.currentTime(segStart);
-	this.player_.play();
+	this.player().currentTime(segStart);
+	this.player().play();
 	this.rs.bar.activatePlay(segStart,segEnd);
 };
 
 videojs.SelectionBar.prototype.updateLeft = function(left) {
-	var rightVal = this.rs.right.el_.style.left!=''?this.rs.right.el_.style.left:100;
+	var rightVal = this.rs.right.el().style.left!=''?this.rs.right.el().style.left:100;
 	var right = parseFloat(rightVal) / 100;
 	
 	var width = videojs.round((right - left),this.rs.updatePrecision); //round necessary for not get 0.6e-7 for example that it's not able for the html css width
 	
 	//(right+0.00001) is to fix the precision of the css in html
 	if(left <= (right+0.00001)) {
-			this.rs.bar.el_.style.left = (left * 100) + '%';
-			this.rs.bar.el_.style.width = (width * 100) + '%';
+			this.rs.bar.el().style.left = (left * 100) + '%';
+			this.rs.bar.el().style.width = (width * 100) + '%';
 			return true;
 	}
 	return false;
 };
 		
 videojs.SelectionBar.prototype.updateRight = function(right) {
-	var leftVal = this.rs.left.el_.style.left!=''?this.rs.left.el_.style.left:0;
+	var leftVal = this.rs.left.el().style.left!=''?this.rs.left.el().style.left:0;
 	var left = parseFloat(leftVal) / 100;
 	
 	var width = videojs.round((right - left),this.rs.updatePrecision);//round necessary for not get 0.6e-7 for example that it's not able for the html css width
 	
 	//(right+0.00001) is to fix the precision of the css in html
 	if((right+0.00001) >= left) {
-		this.rs.bar.el_.style.width = (width * 100) + '%';
-		this.rs.bar.el_.style.left = ((right  - width) * 100) + '%';
+		this.rs.bar.el().style.width = (width * 100) + '%';
+		this.rs.bar.el().style.left = ((right  - width) * 100) + '%';
 		return true;
 	}
 	return false;
@@ -764,17 +764,17 @@ videojs.SelectionBar.prototype.activatePlay = function(start,end){
 	
 	this.suspendPlay();
 	
-	this.player_.on("timeupdate", videojs.bind(this,this._processPlay));
+	this.player().on("timeupdate", videojs.bind(this,this._processPlay));
 };
 
 videojs.SelectionBar.prototype.suspendPlay = function(){
 	this.fired = false;
-	this.player_.off("timeupdate", videojs.bind(this,this._processPlay));
+	this.player().off("timeupdate", videojs.bind(this,this._processPlay));
 };
 
 videojs.SelectionBar.prototype._processPlay = function (){
 	//Check if current time is between start and end
-    if(this.player_.currentTime() >= this.timeStart && (this.timeEnd < 0 || this.player_.currentTime() < this.timeEnd)){
+    if(this.player().currentTime() >= this.timeStart && (this.timeEnd < 0 || this.player().currentTime() < this.timeEnd)){
         if(this.fired){ //Do nothing if start has already been called
             return;
         }
@@ -784,8 +784,8 @@ videojs.SelectionBar.prototype._processPlay = function (){
             return;
         }
         this.fired = false; //Set fired flat to false
-        this.player_.pause(); //Call end function
-        this.player_.currentTime(this.timeEnd);
+        this.player().pause(); //Call end function
+        this.player().currentTime(this.timeEnd);
         this.suspendPlay();
     }
 };
@@ -818,7 +818,7 @@ videojs.SelectionBarLeft = videojs.Component.extend({
 });
 
 videojs.SelectionBarLeft.prototype.init_ = function(){
-    	this.rs = this.player_.rangeslider;
+    	this.rs = this.player().rangeslider;
 };
 
 videojs.SelectionBarLeft.prototype.createEl = function(){
@@ -834,13 +834,13 @@ videojs.SelectionBarLeft.prototype.onMouseDown = function(event) {
 	if(!this.rs.options.locked) {
 		this.pressed = true;
 		videojs.on(document, "mouseup", videojs.bind(this,this.onMouseUp));
-		videojs.addClass(this.el_, 'active');
+		videojs.addClass(this.el(), 'active');
 	}
 };
 
 videojs.SelectionBarLeft.prototype.onMouseUp = function(event) {
 	videojs.off(document, "mouseup", this.onMouseUp, false);
-	videojs.removeClass(this.el_, 'active');
+	videojs.removeClass(this.el(), 'active');
 	if(!this.rs.options.locked) {
 		this.pressed = false;
 	}
@@ -864,7 +864,7 @@ videojs.SelectionBarRight = videojs.Component.extend({
 });
 
 videojs.SelectionBarRight.prototype.init_ = function(){
-    	this.rs = this.player_.rangeslider;
+    	this.rs = this.player().rangeslider;
 };
 
 videojs.SelectionBarRight.prototype.createEl = function(){
@@ -881,13 +881,13 @@ videojs.SelectionBarRight.prototype.onMouseDown = function(event) {
 	if(!this.rs.options.locked) {
 		this.pressed = true;
 		videojs.on(document, "mouseup", videojs.bind(this,this.onMouseUp));
-		videojs.addClass(this.el_, 'active');
+		videojs.addClass(this.el(), 'active');
 	}
 };
 
 videojs.SelectionBarRight.prototype.onMouseUp = function(event) {
 	videojs.off(document, "mouseup", this.onMouseUp, false);
-	videojs.removeClass(this.el_, 'active');
+	videojs.removeClass(this.el(), 'active');
 	if(!this.rs.options.locked) {
 		this.pressed = false;
 	}
@@ -908,15 +908,15 @@ videojs.TimePanel = videojs.Component.extend({
 });
 
 videojs.TimePanel.prototype.init_ = function(){
-    	this.rs = this.player_.rangeslider;
+    	this.rs = this.player().rangeslider;
 };
 
-videojs.TimePanel.prototype.options_ = {
+videojs.TimePanel.prototype.options({
 	children: {
 		'TimePanelLeft': {},
-		'TimePanelRight': {},
+		'TimePanelRight': {}
 	}
-};
+});
 
 videojs.TimePanel.prototype.createEl = function(){
 	return videojs.Component.prototype.createEl.call(this, 'div', {
@@ -939,7 +939,7 @@ videojs.TimePanelLeft = videojs.Component.extend({
 });
 
 videojs.TimePanelLeft.prototype.init_ = function(){
-    	this.rs = this.player_.rangeslider;
+    	this.rs = this.player().rangeslider;
 };
 
 videojs.TimePanelLeft.prototype.createEl = function(){
@@ -964,7 +964,7 @@ videojs.TimePanelRight = videojs.Component.extend({
 });
 
 videojs.TimePanelRight.prototype.init_ = function(){
-    	this.rs = this.player_.rangeslider;
+    	this.rs = this.player().rangeslider;
 };
 
 videojs.TimePanelRight.prototype.createEl = function(){
@@ -989,16 +989,16 @@ videojs.ControlTimePanel= videojs.Component.extend({
 });
 
 videojs.ControlTimePanel.prototype.init_ = function(){
-    	this.rs = this.player_.rangeslider;
+    	this.rs = this.player().rangeslider;
 };
 
 
-videojs.ControlTimePanel.prototype.options_ = {
+videojs.ControlTimePanel.prototype.options({
 	children: {
 		'ControlTimePanelLeft': {},
-		'ControlTimePanelRight': {},
+		'ControlTimePanelRight': {}
 	}
-};
+});
 
 videojs.ControlTimePanel.prototype.createEl = function(){
 	return videojs.Component.prototype.createEl.call(this, 'div', {
@@ -1008,12 +1008,12 @@ videojs.ControlTimePanel.prototype.createEl = function(){
 
 videojs.ControlTimePanel.prototype.enable = function(enable){
 	var enable = typeof enable != 'undefined'? enable:true;
-	this.rs.ctpl.el_.children[0].disabled = enable?"":"disabled";
-	this.rs.ctpl.el_.children[1].disabled = enable?"":"disabled";
-	this.rs.ctpl.el_.children[2].disabled = enable?"":"disabled";
-	this.rs.ctpr.el_.children[0].disabled = enable?"":"disabled";
-	this.rs.ctpr.el_.children[1].disabled = enable?"":"disabled";
-	this.rs.ctpr.el_.children[2].disabled = enable?"":"disabled";
+	this.rs.ctpl.el().children[0].disabled = enable?"":"disabled";
+	this.rs.ctpl.el().children[1].disabled = enable?"":"disabled";
+	this.rs.ctpl.el().children[2].disabled = enable?"":"disabled";
+	this.rs.ctpr.el().children[0].disabled = enable?"":"disabled";
+	this.rs.ctpr.el().children[1].disabled = enable?"":"disabled";
+	this.rs.ctpr.el().children[2].disabled = enable?"":"disabled";
 };
 
 
@@ -1033,7 +1033,7 @@ videojs.ControlTimePanelLeft = videojs.Component.extend({
 });
 
 videojs.ControlTimePanelLeft.prototype.init_ = function(){
-    this.rs = this.player_.rangeslider;
+    this.rs = this.player().rangeslider;
 	this.timeOld = {};
 };
 
@@ -1045,13 +1045,13 @@ videojs.ControlTimePanelLeft.prototype.createEl = function(){
 };
 
 videojs.ControlTimePanelLeft.prototype.onKeyDown = function(event) {
-	this.timeOld[0] = this.el_.children[0].value;
-	this.timeOld[1] = this.el_.children[1].value;
-	this.timeOld[2] = this.el_.children[2].value;
+	this.timeOld[0] = this.el().children[0].value;
+	this.timeOld[1] = this.el().children[1].value;
+	this.timeOld[2] = this.el().children[2].value;
 };
 
 videojs.ControlTimePanelLeft.prototype.onKeyUp = function(event) {
-	this.rs._checkControlTime(0,this.el_.children,this.timeOld);
+	this.rs._checkControlTime(0,this.el().children,this.timeOld);
 };
 
 
@@ -1072,7 +1072,7 @@ videojs.ControlTimePanelRight = videojs.Component.extend({
 });
 
 videojs.ControlTimePanelRight.prototype.init_ = function(){
-    	this.rs = this.player_.rangeslider;
+    	this.rs = this.player().rangeslider;
     	this.timeOld = {};
 };
 
@@ -1084,12 +1084,12 @@ videojs.ControlTimePanelRight.prototype.createEl = function(){
 };
 
 videojs.ControlTimePanelRight.prototype.onKeyDown = function(event) {
-	this.timeOld[0] = this.el_.children[0].value;
-	this.timeOld[1] = this.el_.children[1].value;
-	this.timeOld[2] = this.el_.children[2].value;
+	this.timeOld[0] = this.el().children[0].value;
+	this.timeOld[1] = this.el().children[1].value;
+	this.timeOld[2] = this.el().children[2].value;
 };
 
 videojs.ControlTimePanelRight.prototype.onKeyUp = function(event) {
-	this.rs._checkControlTime(1,this.el_.children,this.timeOld);
+	this.rs._checkControlTime(1,this.el().children,this.timeOld);
 };
 })();
